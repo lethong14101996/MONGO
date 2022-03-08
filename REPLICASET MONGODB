@@ -1,0 +1,127 @@
+I. Mongo 1
+IP: 192.168.111.142
+yum install epel-release -y 
+yum update -y
+vi /etc/hosts
+192.168.111.142 mongo01
+192.168.111.143 mongo02
+192.168.111.144 mongo03
+setenfore 0
+sed -i --follow-symlinks 's/SELINUX=enforcing/SELINUX=disabled/g' /etc/sysconfig/selinux
+vi /etc/yum.repos.d/mongodb-org-4.2.repo
+[mongodb-org-4.2]
+name=MongoDB Repository
+baseurl=https://repo.mongodb.org/yum/redhat/$releasever/mongodb-org/4.2/x86_64/
+gpgcheck=1
+enabled=1
+gpgkey=https://www.mongodb.org/static/pgp/server-4.2.asc
+yum install -y mongodb-org
+openssl rand -base64 756 > mongo.key
+mkdir /opt/mongo
+mv ~/mongo.key /opt/mongo
+scp /opt/mongo/mongo.key root@192.168.111.143:/opt/mongo/
+scp /opt/mongo/mongo.key root@192.168.111.144:/opt/mongo/
+chmod 400 /opt/mongo/mongo.key
+chown mongod:mongod /opt/mongo/mongo.key
+mongo
+use admin
+db.createUser({user: "happy", pwd: "TDAn94xB6Bw3uZmW", roles:[{role: "root", db: "admin"}]})
+vi /etc/mongod.conf
+net:
+  port: 27017
+  bindIp: 0.0.0.0
+security:
+  keyFile: /opt/mongo/mongo.key
+replication:
+  replSetName: happy
+firewall-cmd --permanent --add-port=27017/tcp
+firewall-cmd --reload
+systemctl restart mongod
+systemctl enable mongod
+mongo -u happy -p --authenticationDatabase admin
+rs.initiate()
+rs.add("mongo02")
+rs.addArb("mongo03")
+rs.conf()
+rs.status()
+rs.isMaster()
+mongo -u happy -p --authenticationDatabase admin
+use demo
+for (var i = 0; i <= 10; i++) db.exampleCollection.insert( { x : i } )
+II. Mongo 2
+IP: 192.168.111.143
+yum install epel-release -y 
+yum update -y
+vi /etc/hosts
+192.168.111.142 mongo01
+192.168.111.143 mongo02
+192.168.111.144 mongo03
+setenfore 0
+sed -i --follow-symlinks 's/SELINUX=enforcing/SELINUX=disabled/g' /etc/sysconfig/selinux
+vi /etc/yum.repos.d/mongodb-org-4.2.repo
+[mongodb-org-4.2]
+name=MongoDB Repository
+baseurl=https://repo.mongodb.org/yum/redhat/$releasever/mongodb-org/4.2/x86_64/
+gpgcheck=1
+enabled=1
+gpgkey=https://www.mongodb.org/static/pgp/server-4.2.asc
+yum install -y mongodb-org
+mkdir /opt/mongo
+chmod 400 /opt/mongo/mongo.key
+chown mongod:mongod /opt/mongo/mongo.key
+mongo
+use admin
+db.createUser({user: "happy", pwd: "TDAn94xB6Bw3uZmW", roles:[{role: "root", db: "admin"}]})
+vi /etc/mongod.conf
+net:
+  port: 27017
+  bindIp: 0.0.0.0
+security:
+  keyFile: /opt/mongo/mongo.key
+replication:
+  replSetName: happy
+firewall-cmd --permanent --add-port=27017/tcp
+firewall-cmd --reload
+systemctl restart mongod
+systemctl enable mongod
+netstat -plntu
+mongo -u happy -p --authenticationDatabase admin
+db.getMongo().setSlaveOk()
+use demo
+db.exampleCollection.find()
+III. Mongo 3
+IP: 192.168.111.144
+yum install epel-release -y 
+yum update -y
+vi /etc/hosts
+192.168.111.142 mongo01
+192.168.111.143 mongo02
+192.168.111.144 mongo03
+setenfore 0
+sed -i --follow-symlinks 's/SELINUX=enforcing/SELINUX=disabled/g' /etc/sysconfig/selinux
+vi /etc/yum.repos.d/mongodb-org-4.2.repo
+[mongodb-org-4.2]
+name=MongoDB Repository
+baseurl=https://repo.mongodb.org/yum/redhat/$releasever/mongodb-org/4.2/x86_64/
+gpgcheck=1
+enabled=1
+gpgkey=https://www.mongodb.org/static/pgp/server-4.2.asc
+yum install -y mongodb-org
+mkdir /opt/mongo
+chmod 400 /opt/mongo/mongo.key
+chown mongod:mongod /opt/mongo/mongo.key
+mongo
+use admin
+db.createUser({user: "happy", pwd: "TDAn94xB6Bw3uZmW", roles:[{role: "root", db: "admin"}]})
+vi /etc/mongod.conf
+net:
+  port: 27017
+  bindIp: 0.0.0.0
+security:
+  keyFile: /opt/mongo/mongo.key
+replication:
+  replSetName: happy
+firewall-cmd --permanent --add-port=27017/tcp
+firewall-cmd --reload
+systemctl restart mongod
+systemctl enable mongod
